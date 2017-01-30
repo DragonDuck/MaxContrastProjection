@@ -1,0 +1,22 @@
+Package: ZProjection
+Type: Package
+Title: project 3D images along the z-dimension to 2D
+Version: 0.99.0
+Date: 2016-10-26
+Author: Jan Sauer, Bernd Fischer
+Maintainer: Jan Sauer <jan.sauer@dkfz-heidelberg.de>
+Description: This R/Bioconductor package provides methods to project 3D images
+    stacks along the z-dimension to 2D. Different methods like maximum projection
+    and maximal contrast projection are implemented.
+License: Artistic-2.0
+LazyLoad: true
+Imports:
+    EBImage, stats
+Depends:
+    methods, R (>= 3.3)
+VignetteBuilder: knitr
+Suggests:
+    knitr, BiocStyle
+SystemRequirements: GNU make
+biocViews: Software, Visualization
+RoxygenNote: 5.0.1
