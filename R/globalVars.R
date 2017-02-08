@@ -10,12 +10,12 @@ NULL
 #' @keywords data
 NULL
 
-#' ZProjection: A package for performing z-projections of image stacks
+#' MaxContrastProjection: A package for performing z-projections of image stacks
 #'
-#' The package ZProjection provides functions to perform the common intensity projections (max, min, etc.) as well as a maximum contrast projection we introduce here.
+#' The package MaxContrastProjection provides functions to perform the common intensity projections (max, min, etc.) as well as a maximum contrast projection we introduce here.
 #'
 #' @docType package
-#' @name ZProjection
+#' @name MaxContrastProjection
 #' @examples 
 #' data(cells)
 #' proj = contrastProjection(imageStack = cells, w_x = 15, smoothing = 5)
