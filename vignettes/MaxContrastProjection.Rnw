@@ -1,6 +1,6 @@
-%\VignetteIndexEntry{ZProjection}
-%\VignetteKeywords{ZProjection}
-%\VignettePackage{ZProjection}
+%\VignetteIndexEntry{MaxContrastProjection}
+%\VignetteKeywords{MaxContrastProjection}
+%\VignettePackage{MaxContrastProjection}
 %\VignetteEngine{knitr::knitr}
 
 \documentclass[10pt,a4paper]{article}
@@ -21,7 +21,7 @@ BiocStyle::latex()
 \begin{document}
 %\SweaveOpts{concordance=TRUE}
 
-\title{ZProjection}
+\title{MaxContrastProjection}
 
 \author{Jan Sauer}
 
@@ -59,7 +59,7 @@ A look at the maximum intensity projection, shown in Fig. \ref{fig:dapimaxproj},
 \caption{A comparison of the maximum intensity projection and the maximum contrast projection of the images seen in Fig. \ref{fig:dapizstacks}}
 \end{figure}
 
-The package \Biocpkg{ZProjection} is an \R{}~implementation for projections, including the contrast projection as well as other commonly used projections in image processing.
+The package \Biocpkg{MaxContrastProjection} is an \R{}~implementation for projections, including the contrast projection as well as other commonly used projections in image processing.
 
 \section{Contrast Projection}
 
@@ -110,7 +110,7 @@ We will use the image data for the organoids already presented in the Introducti
 
 The $cells$ dataset represents a stack of 11 images, each with a size of 261 x 251 pixels (see Fig. \ref{fig:dapizstacks})
 <<>>=
-library(ZProjection)
+library(MaxContrastProjection)
 library(EBImage)
 data(cells)
 dim(cells)
