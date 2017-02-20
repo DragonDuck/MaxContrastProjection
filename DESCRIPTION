@@ -13,7 +13,7 @@ LazyLoad: true
 Imports:
     EBImage, stats
 Depends:
-    methods, R (>= 3.3)
+    methods, R (>= 3.4)
 VignetteBuilder: knitr
 Suggests:
     knitr, BiocStyle
