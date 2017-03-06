@@ -4,7 +4,7 @@
 \alias{calcContrast}
 \title{Calculate Local Image Contrast}
 \usage{
-calcContrast(image, w_x, w_y, brushShape = "box", validate = TRUE)
+calcContrast(image, w_x, w_y, brushShape = "disc", validate = TRUE)
 }
 \arguments{
 \item{image}{A numeric 2D matrix-like on which the contrast should be determined}
@@ -13,7 +13,7 @@ calcContrast(image, w_x, w_y, brushShape = "box", validate = TRUE)
 
 \item{w_y}{The size of the window in y-direction}
 
-\item{brushShape}{A string indicating the shape of the window. Currently supported values are: \code{"box", "disc"}}
+\item{brushShape}{A string indicating the shape of the window. Currently supported values are \code{"box", "disc"} and the default is "disc".}
 
 \item{validate}{A boolean value indicating if the variables need to be validated or if this function is being called internally, i.e. the variables have already neen validated once}
 }
@@ -37,4 +37,3 @@ print(calcContrast)
 Jan Sauer
 }
 \keyword{array}
-

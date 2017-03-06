@@ -11,7 +11,8 @@ fixGaussianBlur(imageStack, indexMap, blur.size, validate = TRUE)
 
 \item{indexMap}{A custom index map according to which the image stack is projected. The values must be integers between 1 and the number of layers in \code{imageStack}}
 
-\item{blur.size}{A numerical value indicating the size of the gaussian blur}
+\item{blur.size}{A numerical value indicating the radius of the gaussian blur. The total size of the brush is defined as 2*blur.size+1, meaning that a 'blur.size' value 
+of 0 will result in a 1x1 pixel brush, which has no effect on the image.}
 
 \item{validate}{A boolean indicating if the function arguments should be validated}
 }
@@ -35,4 +36,3 @@ print(fixGaussianBlur)
 Jan Sauer
 }
 \keyword{array}
-

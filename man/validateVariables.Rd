@@ -49,4 +49,3 @@ print(validateVariables)
 Jan Sauer
 }
 \keyword{array}
-

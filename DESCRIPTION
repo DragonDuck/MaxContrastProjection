@@ -17,12 +17,12 @@ Description: A problem when recording 3D fluorescent microscopy images is how to
 License: Artistic-2.0
 LazyLoad: true
 Imports:
-    EBImage, stats
+    EBImage, stats, methods
 Depends:
-    methods, R (>= 3.4)
+    R (>= 3.4)
 VignetteBuilder: knitr
 Suggests:
     knitr, BiocStyle
 SystemRequirements: GNU make
-biocViews: Software, Visualization
-RoxygenNote: 5.0.1
+biocViews: CellBasedAssays, Preprocessing, Software, Visualization
+RoxygenNote: 6.0.1

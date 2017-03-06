@@ -35,4 +35,3 @@ print(proj)
 Jan Sauer
 }
 \keyword{array}
-

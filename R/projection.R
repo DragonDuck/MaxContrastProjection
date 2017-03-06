@@ -1,5 +1,28 @@
 library(EBImage)
 
+#' @import EBImage 
+#' @import methods 
+#' @import stats
+NULL
+
+#' A sample segment of an organoid
+#' @name cells
+#' @docType data
+#' @author Jan Sauer
+#' @keywords data
+NULL
+
+#' MaxContrastProjection: A package for performing z-projections of image stacks
+#'
+#' The package MaxContrastProjection provides functions to perform the common intensity projections (max, min, etc.) as well as a maximum contrast projection we introduce here.
+#'
+#' @docType package
+#' @name MaxContrastProjection
+#' @examples 
+#' data(cells)
+#' proj = contrastProjection(imageStack = cells, w_x = 15, smoothing = 5)
+NULL
+
 #' @title Validate Function Arguments
 #' 
 #' @description Validate the function arguments based on predefined rules. This functions has no application for users.
@@ -29,6 +52,10 @@ library(EBImage)
 validateVariables = function(imageStack, image, w_x, w_y, smoothing, brushShape, projType, interpolation, 
                              contrastStack, indexMap, fix.gaussian.blur, blur.size, 
                              return.all) {
+  
+  BRUSH_SHAPES = c("box", "disc")
+  PROJ_TYPES = c("max", "min", "mean", "median", "sd", "sum")
+  
   if(!missing(imageStack)) {
     if(!is.numeric(imageStack)) stop("'imageStack' must be numeric")
     if(length(dim(imageStack)) != 3) stop("'imageStack' must be a 3D array")
@@ -69,11 +96,11 @@ validateVariables = function(imageStack, image, w_x, w_y, smoothing, brushShape,
   }
   
   if(!missing(brushShape)) {
-    if(!brushShape %in% .pkgenv$.BRUSH_SHAPES) stop("'brushShape' must be one of: ", paste(.pkgenv$.BRUSH_SHAPES, collapse = ", "))
+    if(!brushShape %in% BRUSH_SHAPES) stop("'brushShape' must be one of: ", paste(BRUSH_SHAPES, collapse = ", "))
   }
   
   if(!missing(projType)) {
-    if(!projType %in% .pkgenv$.PROJ_TYPES) stop("'projType' must be one of: ", paste(.pkgenv$.PROJ_TYPES, collapse = ", "))
+    if(!projType %in% PROJ_TYPES) stop("'projType' must be one of: ", paste(PROJ_TYPES, collapse = ", "))
   }
   
   if(!missing(indexMap)) {
@@ -111,7 +138,7 @@ validateVariables = function(imageStack, image, w_x, w_y, smoothing, brushShape,
 #' @param image A numeric 2D matrix-like on which the contrast should be determined
 #' @param w_x The size of the window in x-direction
 #' @param w_y The size of the window in y-direction
-#' @param brushShape A string indicating the shape of the window. Currently supported values are: \code{"box", "disc"}
+#' @param brushShape A string indicating the shape of the window. Currently supported values are \code{"box", "disc"} and the default is "disc".
 #' @param validate A boolean value indicating if the variables need to be validated or if this function is being called internally, i.e. the variables have already neen validated once
 #' 
 #' @details The local contrast is calculated for every pixel of \code{image}. This means that a window is centered around 
@@ -127,7 +154,7 @@ validateVariables = function(imageStack, image, w_x, w_y, smoothing, brushShape,
 #' 
 #' @examples print(calcContrast)
 #' @export
-calcContrast = function(image, w_x, w_y, brushShape = "box", validate = TRUE) {
+calcContrast = function(image, w_x, w_y, brushShape = "disc", validate = TRUE) {
   # Check that all necessary arguments are present
   if(missing(image)) stop("'image' is missing")
   if(missing(w_x)) stop("'w_x' is missing")
@@ -152,7 +179,7 @@ calcContrast = function(image, w_x, w_y, brushShape = "box", validate = TRUE) {
 
 #' @describeIn contrastProjection Get the full stack of contrast maps for each image in the image stack
 #' @export
-getContrastStack = function(imageStack, w_x, w_y, brushShape = "box", validate = TRUE) {
+getContrastStack = function(imageStack, w_x, w_y, brushShape = "disc", validate = TRUE) {
   # Check that all necessary arguments are present
   if(missing(imageStack)) stop("'imageStack' is missing")
   if(missing(w_x)) stop("'w_x' is missing")
@@ -199,13 +226,15 @@ getIndexMap = function(contrastStack, smoothing = 0, validate = TRUE) {
 #' @param w_x The size of the window in x-direction
 #' @param w_y The size of the window in y-direction
 #' @param smoothing The size of the median filter window. If this is 0, median smoothing is not applied.
-#' @param brushShape A string indicating the shape of the window. Currently supported values are: \code{"box", "disc"}
+#' @param brushShape A string indicating the shape of the window. Currently supported values are \code{"box", "disc"} and "disc" is the default
 #' @param interpolation The size of the blurring kernel to use when interpolating values at the boundaries of regions in the index map. Set to 0 for no interpolation.
 #' @param indexMap A custom index map according to which the image stack is projected. The values must be integers between 1 and the number of layers in \code{imageStack}
-#' @param validate A boolean value indicating if the variables need to be validated or if this function is being called internally, i.e. the variables have already neen validated once. This should generally be set to \code{TRUE} if called by the user.
+#' @param validate A boolean value indicating if the variables need to be validated or if this function is being called internally, i.e. the variables have already neen 
+#' validated once. This should generally be set to \code{TRUE} if called by the user.
 #' @param contrastStack A numeric 3D array-like which contains the local contrasts for each image in \code{imageStack} at each pixel
 #' @param fix.gaussian.blur A logical value indicating whether the false gaussian blur caused by unfocused images should be fixed or not
-#' @param blur.size An integer indicating the size of the gaussian blur. Only required if \code{fix.gaussian.blur = TRUE}
+#' @param blur.size An integer indicating the size of the gaussian blur. Only required if \code{fix.gaussian.blur = TRUE}. The total size of the brush is defined as 2*blur.size+1, 
+#' meaning that a 'blur.size' value of 0 will result in a 1x1 pixel brush, which has no effect on the image.
 #' @param return.all A logical value indicating whether only the projection should be returned (FALSE) or if all intermediate results should be returned as well
 #' 
 #' @details The local contrast for every image in the stack is determined using \code{calcContrast}. \code{getContrastStack} returns this stack of contrast maps.
@@ -290,7 +319,8 @@ projection_fromMap = function(imageStack, indexMap, interpolation = 0, validate 
     # Blur edges according to interpolation size
     edge_filter = matrix(1 / interpolation**2, nrow = interpolation, ncol = interpolation)
     indexMap_blurred = filter2(x = indexMap, filter = edge_filter)
-    indexMap_blurred = round(indexMap_blurred, digits = 5) # This eliminates machine precision issues
+    # This eliminates machine precision issues. There is no deeper meaning to the number here. Change only if it causes problems.
+    indexMap_blurred = round(indexMap_blurred, digits = 5)
     
     # Get the low and high projection
     indexMap_blurred_low = matrix(floor(indexMap_blurred), nrow = nrow(indexMap_blurred), ncol = ncol(indexMap_blurred))
@@ -361,7 +391,8 @@ intensityProjection = function(imageStack, projType = "max") {
 #' 
 #' @param imageStack A numeric 3D array-like which should ne projected. The dimensions should be (spatial_1, spatial_2, numer_of_images)
 #' @param indexMap A custom index map according to which the image stack is projected. The values must be integers between 1 and the number of layers in \code{imageStack}
-#' @param blur.size A numerical value indicating the size of the gaussian blur
+#' @param blur.size A numerical value indicating the radius of the gaussian blur. The total size of the brush is defined as 2*blur.size+1, meaning that a 'blur.size' value 
+#' of 0 will result in a 1x1 pixel brush, which has no effect on the image.
 #' @param validate A boolean indicating if the function arguments should be validated
 #' 
 #' @details Bright objects on dark backgrounds cause projection artefacts, a sort of gaussian "shadow" of the object. This is due to the unfocused images having a higher 
@@ -389,15 +420,9 @@ fixGaussianBlur = function(imageStack, indexMap, blur.size, validate = TRUE) {
   otsu_thresh = otsu(x = proj_min, range = range(proj_min))
   proj_min_bin = proj_min >= otsu_thresh
   
-  # Segment the binary image and fill the small 0-areas (these are inside organoids)
-  proj_min_seg = bwlabel(1 - proj_min_bin)
-  areas = table(as.numeric(proj_min_seg))
-  # The two largest areas should be the background and the correctly recognized foreground
-  # (set to 0 in the labeled image). Everything else must be set to 1 in proj_min_bin 
-  # (see 1 - proj_min_bin above!)
-  areas = sort(areas, decreasing = TRUE)
-  proj_min_bin[!proj_min_seg %in% as.numeric(names(areas))[1:2]] = 1
-  
+  # Fill the small holes in proj_min_bin
+  proj_min_bin = fillHull(proj_min_bin * 1)
+
   # In order to fix the blur, propagation is only required into the areas immediately surrounding the foreground spots
   # This has the advantage of not affecting potentially dark regions not detected by the thresholding as foreground
   f = makeBrush(size = blur.size*2+1, shape = "disc", step = TRUE)
@@ -409,9 +434,9 @@ fixGaussianBlur = function(imageStack, indexMap, blur.size, validate = TRUE) {
   # Define the seed map, i.e. the regions from which to propagate
   seed_map = indexMap * proj_min_bin
   
-  # Propagating with a mask doesn't seem to work
-  # indexMap_adjusted = propagate(x = matrix(0, nrow = 2048, ncol = 2048), seeds = seed_map, mask = expand_region, lambda = 1e6)
-  indexMap_adjusted = propagate(x = matrix(0, nrow = 2048, ncol = 2048), seeds = seed_map, lambda = 1e6)
+  # lambda is a mixing parameter between the euclidean distance and the gradient of 'x' in 'EBImage::propagate()' when calculating the distance 'd' between two points.
+  # According to the documentation of this function, as lambda goes to infinity, 'd' tends to the euclidean distance, so a sufficiently large value of lambda should be used here.
+  indexMap_adjusted = propagate(x = matrix(0, nrow = dim(imageStack)[1], ncol = dim(imageStack)[2]), seeds = seed_map, lambda = 1e6)
   
   # The true index map is now the combination of the original index map plus the propagated values in the expand regions
   true_index_map = indexMap
