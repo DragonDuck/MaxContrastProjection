@@ -4,9 +4,9 @@
 \alias{validateVariables}
 \title{Validate Function Arguments}
 \usage{
-validateVariables(imageStack, image, w_x, w_y, smoothing, brushShape, projType,
-  interpolation, contrastStack, indexMap, fix.gaussian.blur, blur.size,
-  return.all)
+validateVariables(imageStack, image, w_x, w_y, smoothing, brushShape, 
+    projType, interpolation, contrastStack, indexMap, fix.gaussian.blur, 
+    blur.size, return.all)
 }
 \arguments{
 \item{imageStack}{A numeric 3D array-like}
@@ -27,20 +27,25 @@ validateVariables(imageStack, image, w_x, w_y, smoothing, brushShape, projType,
 
 \item{contrastStack}{A numeric 3D array-like}
 
-\item{indexMap}{A numeric 2D array-like. Must always be validated simultaneously with \code{imageStack}}
+\item{indexMap}{A numeric 2D array-like. Must always be validated 
+simultaneously with \code{imageStack}}
 
-\item{fix.gaussian.blur}{A logical parameter, or one which can be coerced to a logical value}
+\item{fix.gaussian.blur}{A logical parameter, or one which can be coerced 
+to a logical value}
 
 \item{blur.size}{An integer value}
 
-\item{return.all}{A logical parameter, or one which can be coerced to a logical value}
+\item{return.all}{A logical parameter, or one which can be coerced to a 
+logical value}
 }
 \value{
 A boolean indicating that the function ran without error.
 }
 \description{
-Validate the function arguments based on predefined rules. This functions has no application for users.
-It either returns TRUE if all variables conform to the rules or stops execution in case one of the conditions is not met.
+Validate the function arguments based on predefined rules. This
+function has no application for users and serves only to ensure correct 
+variables. It either returns TRUE if all variables conform to the rules or 
+stops execution in case one of the conditions is not met.
 }
 \examples{
 print(validateVariables)

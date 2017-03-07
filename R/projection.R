@@ -50,6 +50,11 @@ NULL
 #' @param return.all A logical parameter, or one which can be coerced to a 
 #' logical value
 #' 
+#' @usage
+#' validateVariables(imageStack, image, w_x, w_y, smoothing, brushShape, 
+#'     projType, interpolation, contrastStack, indexMap, fix.gaussian.blur, 
+#'     blur.size, return.all)
+#' 
 #' @return A boolean indicating that the function ran without error.
 #' 
 #' @author Jan Sauer
@@ -58,9 +63,9 @@ NULL
 #' @examples print(validateVariables)
 #' @export
 validateVariables = function(imageStack, image, w_x, w_y, smoothing, 
-                             brushShape, projType, interpolation, 
-                             contrastStack, indexMap, fix.gaussian.blur, 
-                             blur.size, return.all) {
+                            brushShape, projType, interpolation, 
+                            contrastStack, indexMap, fix.gaussian.blur, 
+                            blur.size, return.all) {
     BRUSH_SHAPES = c("box", "disc")
     PROJ_TYPES = c("max", "min", "mean", "median", "sd", "sum")
     
@@ -112,36 +117,36 @@ validateVariables = function(imageStack, image, w_x, w_y, smoothing,
     if(!missing(brushShape)) {
         if(!brushShape %in% BRUSH_SHAPES) 
             stop("'brushShape' must be one of: ", 
-                 paste(BRUSH_SHAPES, collapse=", "))
+                paste(BRUSH_SHAPES, collapse=", "))
     }
     
     if(!missing(projType)) {
         if(!projType %in% PROJ_TYPES)
             stop("'projType' must be one of: ", 
-                 paste(PROJ_TYPES, collapse = ", "))
+                paste(PROJ_TYPES, collapse = ", "))
     }
     
     if(!missing(indexMap)) {
         if(missing(imageStack)) 
             stop(strwrap("Validation of 'indexMap' only makes sense if 
-                         'imageStack' is also being validated"))
+                        'imageStack' is also being validated"))
         if(!is.numeric(indexMap)) stop("'indexMap' must be numeric")
         if(length(dim(indexMap)) != 2) 
             stop("'indexMap' must have two dimensions: (height, width)")
         if(!all(dim(imageStack)[c(1,2)] == dim(indexMap))) 
             stop(strwrap("The spatial dimensions of 'imageStack' and 'indexMap'
-                         must be identical"))
+                        must be identical"))
         if(min(indexMap) < 1) stop("All values of 'indexMap' must be >= 1")
         if(max(indexMap) > dim(imageStack)[3]) 
             stop(strwrap("All values of 'indexMap' must be <= the number of 
-                         image stacks (", dim(imageStack)[3], ")"))
+                        image stacks (", dim(imageStack)[3], ")"))
     }
     
     if(!missing(fix.gaussian.blur)) {
         fix.gaussian.blur.log = as.logical(fix.gaussian.blur)
         if(is.na(fix.gaussian.blur.log)) 
             stop(strwrap("'fix.gaussian.blur' must be a TRUE/FALSE or must be 
-                         able to be coerced to TRUE/FALSE"))
+                        able to be coerced to TRUE/FALSE"))
     }
     
     if(!missing(blur.size)) {
@@ -155,7 +160,7 @@ validateVariables = function(imageStack, image, w_x, w_y, smoothing,
         return.all.log = as.logical(return.all)
         if(is.na(return.all.log)) 
             stop(strwrap("'return.all' must be a TRUE/FALSE or must be able to 
-                         be coerced to TRUE/FALSE"))
+                        be coerced to TRUE/FALSE"))
     }
     
     return(TRUE)
@@ -174,7 +179,9 @@ validateVariables = function(imageStack, image, w_x, w_y, smoothing,
 #' supported values are \code{"box", "disc"} and the default is "disc".
 #' @param validate A boolean value indicating if the variables need to be 
 #' validated or if this function is being called internally, i.e. the variables
-#' have already been validated once
+#' have already been validated once. This is only used to marginally speed up 
+#' internal calls to functions and has no bearing on the actual functionality 
+#' of the method.
 #' 
 #' @details The local contrast is calculated for every pixel of \code{image}. 
 #' This means that a window is centered around a given pixel and the variance 
@@ -205,12 +212,12 @@ calcContrast = function(image, w_x, w_y, brushShape="disc", validate=TRUE) {
     
     # Validate arguments
     if(validate) valid = validateVariables(image = image, w_x = w_x, w_y = w_y,
-                                           brushShape = brushShape)
+                                        brushShape = brushShape)
     
     f = NULL
     if(brushShape == "box") 
         f = matrix(1 / ((2*w_x + 1)*(2*w_y + 1)), 
-                   nrow = (2*w_y + 1), ncol = (2*w_x + 1))
+                nrow = (2*w_y + 1), ncol = (2*w_x + 1))
     if(brushShape == "disc") {
         f = makeBrush(size = 2*w_x + 1, shape = "disc", step = TRUE)
         f = f / sum(f)
@@ -236,7 +243,7 @@ getContrastStack = function(imageStack, w_x, w_y, brushShape="disc",
     
     # Validate arguments
     if(validate) valid = validateVariables(imageStack=imageStack, w_x=w_x, 
-                                           w_y=w_y, brushShape=brushShape)
+                                        w_y=w_y, brushShape=brushShape)
     
     # Calculate the contrast for each image in the stack
     img_frames = getFrames(imageStack) 
@@ -257,7 +264,7 @@ getIndexMap = function(contrastStack, smoothing=0, validate=TRUE) {
     
     # Validate arguments
     if(validate) valid = validateVariables(contrastStack=contrastStack, 
-                                           smoothing=smoothing)
+                                        smoothing=smoothing)
     
     index_map = apply(contrastStack, c(1,2), function(x) which(x == max(x))[1])
     if(smoothing > 0) {
@@ -290,47 +297,46 @@ getIndexMap = function(contrastStack, smoothing=0, validate=TRUE) {
 #' in \code{imageStack}
 #' @param validate A boolean value indicating if the variables need to be 
 #' validated or if this function is being called internally, i.e. the variables
-#' have already been validated once. This should generally be set to 
-#' \code{TRUE} if called by the user.
+#' have already been validated once. This is only used to marginally speed up 
+#' internal calls to functions and has no bearing on the actual functionality 
+#' of the method.
 #' @param contrastStack A numeric 3D array-like which contains the local 
 #' contrasts for each image in \code{imageStack} at each pixel
 #' @param fix.gaussian.blur A logical value indicating whether the false 
-#' gaussian blur caused by unfocused images should be fixed or not
-#' @param blur.size An integer indicating the size of the gaussian blur. 
-#' Only required if \code{fix.gaussian.blur = TRUE}. The total size of the 
-#' brush is defined as 2*blur.size+1, 
-#' meaning that a 'blur.size' value of 0 will result in a 1x1 pixel brush, 
-#' which has no effect on the image.
+#' gaussian blur caused by unfocused images should be fixed or not (see 
+#' vignette for more details on this).
+#' @param blur.size An integer indicating the radius of the gaussian blur. 
+#' Ignored unless \code{fix.gaussian.blur = TRUE}. The total diameter of the 
+#' brush is defined as 2*blur.size+1, meaning that a 'blur.size' value of 0 
+#' will result in a 1x1 pixel brush.
 #' @param return.all A logical value indicating whether only the projection 
 #' should be returned (FALSE) or if all intermediate results should be returned
-#' as well
+#' as well, including the index map and the contrast stack (TRUE)
 #' 
 #' @details The local contrast for every image in the stack is determined using
 #' \code{calcContrast}. \code{getContrastStack} returns this stack of contrast 
-#' maps.
-#' Then, the z-layer with the highest local contrast is determined for each 
-#' pixel in the \eqn{(x,y)}-plane, resulting in an index map with the same 
-#' spatial dimensions as the input images. This index map can then be smoothed 
-#' with a median filter if desired. \code{getIndexMap} returns this index map. 
-#' Lastly, the image stack is projected into the \eqn{(x,y)}-plane using this 
-#' index map to determine which z-layer to use at every pixel.
+#' maps. Then, the z-layer with the highest local contrast is determined for 
+#' each pixel in the \eqn{(x,y)}-plane, resulting in an index map with the 
+#' same spatial dimensions as the input images. This index map can then be 
+#' smoothed with a median filter if desired. \code{getIndexMap} returns this 
+#' index map. Lastly, the image stack is projected into the \eqn{(x,y)}-plane 
+#' using this index map to determine which z-layer to use at every pixel.
 #' \code{contrastProjection} returns this fully projected image.
 #' 
 #' The \code{brushShape} indicates the shape of the window over which to 
 #' calculate the variance. Depending on the symmetry of the objects being 
-#' imaged, the window
-#' shape may have a significant impact on the quality of the projection.
+#' imaged, the window shape may have a significant impact on the quality of 
+#' the projection.
 #' 
 #' If an object lies in several focal plains then the projection may include 
 #' some artifical boundaries at the edges of the regions in each focal plain. 
 #' Linear interpolation between the two layers at their boundaries serves to 
 #' eliminate this problem. The \code{interpolation} size gives the size of the 
-#' kernel to use for blurring the boundaries 
-#' between individual regions of the index map. The projection values at these 
-#' boundaries are then interpolated based on the non-integer values on the 
-#' index maps. For example, if a pixel on the index map has the value 7.25, 
-#' then the projected value at this pixel is 75% of the intensity in z-layer 7 
-#' and 25% of the intensity in layer 8.
+#' kernel to use for blurring the boundaries between individual regions of the 
+#' index map. The projection values at these boundaries are then interpolated 
+#' based on the non-integer values on the index maps. For example, if a pixel 
+#' on the index map has the value 7.25, then the projected value at this pixel 
+#' is 75% of the intensity in z-layer 7 and 25% of the intensity in layer 8.
 #' 
 #' If a very bright object lies on a dark background, then the gaussian 
 #' blurring of the unfocused image stacks can create a brighter ring structure 
@@ -340,15 +346,22 @@ getIndexMap = function(contrastStack, smoothing=0, validate=TRUE) {
 #' in the image. A perfect segmentation is unnecessary as the rings will only 
 #' appear around exceptionally bright objects, which are easy to segment.
 #' 
-#' @return 
-#'  \item{contrastProjection}{A 2D matrix corresponding to the maximum contrast
-#'  projection of \code{imageStack}}
-#'  \item{getIndexMap}{A 2D matrix indicating the z-layer with the maximum 
-#'  contrast at every pixel in the \eqn{(x,y)-plane} of \code{imageStack}}
-#'  \item{getContrastStack}{a 3D array corresponding to the contrast map for 
-#'  every image of \code{imageStack}}
-#'  \item{projection_fromMap}{A 2D matrix corresponding to the maximum contrast
-#'  projection of \code{imageStack}}
+#' @usage
+#' contrastProjection(imageStack, w_x, w_y = NULL, smoothing = 0,
+#'     brushShape = "disc", interpolation = 0, fix.gaussian.blur = FALSE,
+#'     blur.size = 0, return.all = FALSE)
+#' 
+#' @return
+#' \describe{
+#'     \item{contrastProjection}{A 2D matrix corresponding to the maximum 
+#'     contrast projection of \code{imageStack}}
+#'     \item{getIndexMap}{A 2D matrix indicating the z-layer with the maximum 
+#'     contrast at every pixel in the \eqn{(x,y)-plane} of \code{imageStack}}
+#'     \item{getContrastStack}{a 3D array corresponding to the contrast map 
+#'     for every image of \code{imageStack}}
+#'     \item{projection_fromMap}{A 2D matrix corresponding to the maximum 
+#'     contrast projection of \code{imageStack}}
+#' } 
 #'  
 #' @author Jan Sauer
 #' @keywords array
@@ -359,9 +372,9 @@ getIndexMap = function(contrastStack, smoothing=0, validate=TRUE) {
 #' print(getContrastStack)
 #' @export
 contrastProjection = function(imageStack, w_x, w_y=NULL, smoothing=0, 
-                              brushShape="box", interpolation=0, 
-                              fix.gaussian.blur=FALSE, blur.size=0, 
-                              return.all=FALSE) {
+                            brushShape="disc", interpolation=0, 
+                            fix.gaussian.blur=FALSE, blur.size=0, 
+                            return.all=FALSE) {
     # Check that all necessary arguments are present
     if(missing(imageStack)) stop("'imageStack' is missing")
     if(missing(w_x)) stop("'w_x' is missing")
@@ -374,13 +387,13 @@ contrastProjection = function(imageStack, w_x, w_y=NULL, smoothing=0,
     
     # Validate arguments
     valid = validateVariables(imageStack=imageStack, w_x=w_x, w_y=w_y, 
-                              smoothing=smoothing, brushShape=brushShape, 
-                              fix.gaussian.blur=fix.gaussian.blur, 
-                              blur.size=blur.size, return.all=return.all)
+                            smoothing=smoothing, brushShape=brushShape, 
+                            fix.gaussian.blur=fix.gaussian.blur, 
+                            blur.size=blur.size, return.all=return.all)
     
     # Get the contrast stack
     contrast_stack = getContrastStack(imageStack=imageStack, w_x=w_x, w_y=w_y, 
-                                      brushShape=brushShape, validate=FALSE)
+                                    brushShape=brushShape, validate=FALSE)
     
     # Get the index map
     index_map = getIndexMap(contrastStack=contrast_stack, smoothing=smoothing, 
@@ -393,11 +406,11 @@ contrastProjection = function(imageStack, w_x, w_y=NULL, smoothing=0,
     
     # Project the stack according to the index map
     proj = projection_fromMap(imageStack=imageStack, indexMap=index_map, 
-                              interpolation=interpolation)
+                            interpolation=interpolation)
     
     if(return.all == FALSE) return(proj)
     if(return.all == TRUE) return(list(Contrast.Stack=contrast_stack, 
-                                       Index.Map=index_map, Projection=proj))
+                                    Index.Map=index_map, Projection=proj))
 }
 
 #' @describeIn contrastProjection Get the index map (with or without smoothing)
@@ -405,7 +418,7 @@ contrastProjection = function(imageStack, w_x, w_y=NULL, smoothing=0,
 #' pixel in the \eqn{(x,y)}-plane
 #' @export
 projection_fromMap = function(imageStack, indexMap, interpolation=0, 
-                              validate=TRUE) {
+                            validate=TRUE) {
     # Check that all necessary arguments are present
     if(missing(imageStack)) stop("'imageStack' is missing")
     if(missing(indexMap)) stop("'indexMap' is missing")
@@ -413,14 +426,14 @@ projection_fromMap = function(imageStack, indexMap, interpolation=0,
     # Validate variables
     if(validate)
         valid = validateVariables(imageStack=imageStack, indexMap=indexMap, 
-                                  interpolation=interpolation)
+                                interpolation=interpolation)
     
     storage.mode(indexMap) = "integer"
     
     if(interpolation > 0) {
         # Blur edges according to interpolation size
         edge_filter = matrix(1 / interpolation**2, nrow=interpolation, 
-                             ncol=interpolation)
+                            ncol=interpolation)
         indexMap_blurred = filter2(x=indexMap, filter=edge_filter)
         # This eliminates machine precision issues. There is no deeper meaning 
         # to the number here. Change only if it causes problems.
@@ -428,35 +441,36 @@ projection_fromMap = function(imageStack, indexMap, interpolation=0,
         
         # Get the low and high projection
         indexMap_blurred_low = matrix(floor(indexMap_blurred), 
-                                      nrow=nrow(indexMap_blurred), 
-                                      ncol=ncol(indexMap_blurred))
-        selec_ind_low = expand.grid(1:nrow(indexMap_blurred_low), 
-                                    1:ncol(indexMap_blurred_low))
+                                    nrow=nrow(indexMap_blurred), 
+                                    ncol=ncol(indexMap_blurred))
+        selec_ind_low = expand.grid(seq_len(nrow(indexMap_blurred_low)), 
+                                    seq_len(ncol(indexMap_blurred_low)))
         low_proj = matrix(imageStack[cbind(selec_ind_low$Var1, 
-                                           selec_ind_low$Var2, 
-                                           as.vector(indexMap_blurred_low))],
-                          nrow(indexMap_blurred_low), 
-                          ncol(indexMap_blurred_low))
+                                        selec_ind_low$Var2, 
+                                        as.vector(indexMap_blurred_low))],
+                        nrow(indexMap_blurred_low), 
+                        ncol(indexMap_blurred_low))
         
         indexMap_blurred_high = matrix(ceiling(indexMap_blurred), 
-                                       nrow=nrow(indexMap_blurred), 
-                                       ncol=ncol(indexMap_blurred))
-        selec_ind_high = expand.grid(1:nrow(indexMap_blurred_high), 
-                                     1:ncol(indexMap_blurred_high))
+                                    nrow=nrow(indexMap_blurred), 
+                                    ncol=ncol(indexMap_blurred))
+        selec_ind_high = expand.grid(seq_len(nrow(indexMap_blurred_high)), 
+                                    seq_len(ncol(indexMap_blurred_high)))
         high_proj = matrix(imageStack[cbind(selec_ind_high$Var1, 
                                             selec_ind_high$Var2, 
                                             as.vector(indexMap_blurred_high))],
-                           nrow(indexMap_blurred_high), 
-                           ncol(indexMap_blurred_high))
+                        nrow(indexMap_blurred_high), 
+                        ncol(indexMap_blurred_high))
         
         high_proj_contribution = (indexMap_blurred - indexMap_blurred_low)
         proj = (high_proj_contribution * high_proj) + 
             ((1 - high_proj_contribution) * low_proj)
     } else {
-        selec.ind = expand.grid(1:nrow(indexMap), 1:ncol(indexMap))
+        selec.ind = expand.grid(seq_len(nrow(indexMap)), 
+                                seq_len(ncol(indexMap)))
         proj = matrix(imageStack[cbind(selec.ind$Var1, selec.ind$Var2, 
-                                       as.vector(indexMap))], 
-                      nrow(indexMap), ncol(indexMap))
+                                    as.vector(indexMap))], 
+                    nrow(indexMap), ncol(indexMap))
     }
     
     return(proj)
@@ -474,24 +488,26 @@ projection_fromMap = function(imageStack, indexMap, interpolation=0,
 #' \code{"max", "min", "mean", "median", "sd", "sum"}
 #' 
 #' @details The \code{projType} determines the time of projection to be used:
-#'  - "max": Each pixel of the output image takes on the maximum value of the 
-#'           z-stack underneath the corresponding pixel of the input image 
-#'           stack.
-#'  - "min": Each pixel of the output image takes on the minimum value of the 
-#'           z-stack underneath the corresponding pixel of the input image 
-#'           stack.
-#'  - "mean": Each pixel of the output image takes on the mean value of the 
-#'            z-stack underneath the corresponding pixel of the input image 
-#'            stack.
-#'  - "median": Each pixel of the output image takes on the median value of the
-#'              z-stack underneath the corresponding pixel of the input image 
-#'              stack.
-#'  - "sd": Each pixel of the output image takes on the standard deviation of 
-#'          the values of the z-stack underneath the corresponding pixel of the
-#'          input image stack.
-#'  - "sum": Each pixel of the output image takes on the sum of the values of 
-#'           the z-stack underneath the corresponding pixel of the input image 
-#'           stack.
+#' \describe{
+#'     \item{max}{Each pixel of the output image takes on the maximum value of 
+#'     the z-stack underneath the corresponding pixel of the input image 
+#'     stack.}
+#'     \item{min}{Each pixel of the output image takes on the minimum value of 
+#'     the z-stack underneath the corresponding pixel of the input image 
+#'     stack.}
+#'     \item{mean}{Each pixel of the output image takes on the mean value of 
+#'     the z-stack underneath the corresponding pixel of the input image 
+#'     stack.}
+#'     \item{median}{Each pixel of the output image takes on the median value 
+#'     of the z-stack underneath the corresponding pixel of the input image 
+#'     stack.}
+#'     \item{sd}{Each pixel of the output image takes on the standard 
+#'     deviation of the values of the z-stack underneath the corresponding 
+#'     pixel of the input image stack.}
+#'     \item{sum}{Each pixel of the output image takes on the sum of the 
+#'     values of the z-stack underneath the corresponding pixel of the input 
+#'     image stack.}
+#' }
 #' 
 #' @return A 2D matrix corresponding to the maximum intensity projection of 
 #' \code{imageStack}
@@ -512,14 +528,13 @@ intensityProjection = function(imageStack, projType="max") {
     
     proj = NULL
     proj = switch(projType,
-                  "max" = {apply(imageStack, c(1,2), max)},
-                  "min" = {apply(imageStack, c(1,2), min)},
-                  "mean" = {apply(imageStack, c(1,2), mean)},
-                  "median" = {apply(imageStack, c(1,2), median)},
-                  "sd" = {apply(imageStack, c(1,2), sd)},
-                  "sum" = {apply(imageStack, c(1,2), sum)},
-                  {stop("Invalid 'projType' value: ", projType)})
-    
+                "max" = {apply(imageStack, c(1,2), max)},
+                "min" = {apply(imageStack, c(1,2), min)},
+                "mean" = {apply(imageStack, c(1,2), mean)},
+                "median" = {apply(imageStack, c(1,2), median)},
+                "sd" = {apply(imageStack, c(1,2), sd)},
+                "sum" = {apply(imageStack, c(1,2), sum)},
+                {stop("Invalid 'projType' value: ", projType)})
     return(proj)
 }
 
@@ -533,12 +548,12 @@ intensityProjection = function(imageStack, projType="max") {
 #' @param indexMap A custom index map according to which the image stack is 
 #' projected. The values must be integers between 1 and the number of layers 
 #' in \code{imageStack}
-#' @param blur.size A numerical value indicating the radius of the gaussian 
-#' blur. The total size of the brush is defined as 2*blur.size+1, meaning that 
-#' a 'blur.size' value 
-#' of 0 will result in a 1x1 pixel brush, which has no effect on the image.
+#' @param blur.size An integer indicating the radius of the gaussian blur. The 
+#' total diameter of the brush is defined as 2*blur.size+1, meaning that a 
+#' blur.size' value of 0 will result in a 1x1 pixel brush.
 #' @param validate A boolean indicating if the function arguments should be 
-#' validated
+#' validated. This is only used to marginally speed up internal calls to 
+#' functions and has no bearing on the actual functionality of the method.
 #' 
 #' @details Bright objects on dark backgrounds cause projection artefacts, a 
 #' sort of gaussian "shadow" of the object. This is due to the unfocused images
@@ -554,6 +569,7 @@ intensityProjection = function(imageStack, projType="max") {
 #' 
 #' @return An index map with the corrected values around the foreground objects
 #' 
+#' 
 #' @author Jan Sauer
 #' @keywords array
 #' 
@@ -566,7 +582,7 @@ fixGaussianBlur = function(imageStack, indexMap, blur.size, validate=TRUE) {
     
     if(validate) 
         valid = validateVariables(imageStack=imageStack, indexMap=indexMap, 
-                                  blur.size=blur.size)
+                                blur.size=blur.size)
     
     # Use the minimum intensity projection to segment the FG vs BG
     proj_min = intensityProjection(imageStack, "min")
@@ -584,7 +600,7 @@ fixGaussianBlur = function(imageStack, indexMap, blur.size, validate=TRUE) {
     bin_img_overlay = filter2(x=proj_min_bin, filter=f, boundary=0)
     bin_img_overlay[bin_img_overlay > 1] = 1
     bin_img_overlay = bin_img_overlay > otsu(x=bin_img_overlay, 
-                                             range=range(bin_img_overlay))
+                                            range=range(bin_img_overlay))
     expand_region = bin_img_overlay * (1-proj_min_bin)
     
     # Define the seed map, i.e. the regions from which to propagate
@@ -596,8 +612,8 @@ fixGaussianBlur = function(imageStack, indexMap, blur.size, validate=TRUE) {
     # as lambda goes to infinity, 'd' tends to the euclidean distance, so a 
     # sufficiently large value of lambda should be used here.
     indexMap_adjusted = propagate(x=matrix(0, nrow=dim(imageStack)[1], 
-                                           ncol=dim(imageStack)[2]), 
-                                  seeds=seed_map, lambda=1e6)
+                                        ncol=dim(imageStack)[2]), 
+                                seeds=seed_map, lambda=1e6)
     
     # The true index map is now the combination of the original index map plus 
     # the propagated values in the expand regions

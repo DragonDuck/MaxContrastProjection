@@ -4,9 +4,12 @@
 \name{MaxContrastProjection}
 \alias{MaxContrastProjection}
 \alias{MaxContrastProjection-package}
-\title{MaxContrastProjection: A package for performing z-projections of image stacks}
+\title{MaxContrastProjection: A package for performing z-projections of image 
+stacks}
 \description{
-The package MaxContrastProjection provides functions to perform the common intensity projections (max, min, etc.) as well as a maximum contrast projection we introduce here.
+The package MaxContrastProjection provides functions to perform the 
+common intensity projections (max, min, etc.) as well as a maximum 
+contrast projection we introduce here.
 }
 \examples{
 data(cells)
