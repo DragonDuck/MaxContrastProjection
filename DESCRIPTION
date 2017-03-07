@@ -1,7 +1,7 @@
 Package: MaxContrastProjection
 Type: Package
 Title: Perform a maximum contrast projection of 3D images along the z-dimension into 2D
-Version: 0.99.1
+Version: 0.99.2
 Date: 2017-02-08
 Author: Jan Sauer, Bernd Fischer
 Maintainer: Jan Sauer <jan.sauer@dkfz-heidelberg.de>
@@ -18,7 +18,7 @@ Description: A problem when recording 3D fluorescent microscopy images is how
 License: Artistic-2.0
 LazyLoad: true
 Imports: EBImage, stats, methods
-Depends: R (>= 3.3)
+Depends: R (>= 3.4)
 VignetteBuilder: knitr
 Suggests: knitr, BiocStyle, testthat
 SystemRequirements: GNU make
